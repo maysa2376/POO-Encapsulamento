@@ -5,65 +5,45 @@ const conta = new ContaBancaria();
 
 function App() {
   const [valor, setValor] = useState('');
-  const [saldo, setSaldo] = useState(conta.verSaldo());
   const [mensagem, setMensagem] = useState('');
+  const [saldo, setSaldo] = useState(conta.verSaldo());
 
-  // Função para formatar em R$ (Real)
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(valor);
-  };
+  const formatarValor = (v: number) =>
+    v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const atualizarSaldo = () => setSaldo(conta.verSaldo());
 
   const handleDeposito = () => {
-    const num = parseFloat(valor);
-
-    if (isNaN(num) || num <= 0) {
-      setMensagem('Digite um valor válido para depósito.');
-      return;
-    }
-
+    const num = Number(valor);
+    if (num <= 0) return setMensagem('Digite um valor válido para depósito.');
     conta.depositar(num);
-    setSaldo(conta.verSaldo());
+    atualizarSaldo();
     setValor('');
     setMensagem('Depósito realizado com sucesso!');
   };
 
   const handleSaque = () => {
-    const num = parseFloat(valor);
-
-    if (isNaN(num) || num <= 0) {
-      setMensagem('Digite um valor válido para saque.');
-      return;
-    }
-
-    if (num > conta.verSaldo()) {
-      setMensagem('Saldo insuficiente para saque.');
-      return;
-    }
-
+    const num = Number(valor);
+    if (num <= 0) return setMensagem('Digite um valor válido para saque.');
+    if (num > conta.verSaldo()) return setMensagem('Saldo insuficiente para saque.');
     conta.sacar(num);
-    setSaldo(conta.verSaldo());
+    atualizarSaldo();
     setValor('');
     setMensagem('Saque realizado com sucesso!');
   };
 
   return (
-    <div className="App">
+    <div>
       <h1>Conta Bancária</h1>
       <p>Saldo disponível: {formatarValor(saldo)}</p>
-
       <input
         type="number"
         placeholder="Digite um valor"
         value={valor}
-        onChange={(e) => setValor(e.target.value)}
+        onChange={e => setValor(e.target.value)}
       />
-
       <button onClick={handleDeposito}>Depositar</button>
       <button onClick={handleSaque}>Sacar</button>
-
       {mensagem && (
         <p style={{ color: mensagem.includes('sucesso') ? 'green' : 'red' }}>
           {mensagem}
